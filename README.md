@@ -1,0 +1,1 @@
+# gwent-pack-opener

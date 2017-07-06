@@ -22,6 +22,7 @@ const epicToLegendaryUpgradeChance = 0.206;
 // not sure about premium chances yet
 const premiumUpgradeChance = 0.02
 
+// need to double check for non-collectable cards
 var data = require('./data/card_json.json');
 
 class App extends Component {

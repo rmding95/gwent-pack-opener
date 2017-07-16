@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import OpenedCardList from './OpenedCardList.jsx';
 // ASSUMPTIONS
 // rarity of cards in packs is determined by seed
 // cards are chosen randomly
@@ -33,21 +34,20 @@ class App extends Component {
         data.forEach(function(element) {
             if (!(element.rarity in cardData)) {
                 cardData[element.rarity] = []
-                cardData[element.rarity].push(element);
-            } else {
-                cardData[element.rarity].push(element);
             }
+            cardData[element.rarity].push(element);
         }, this);
-
         var seed = getRandomInt(1, 10000);
         this.state = {
             initialKegs: 50,
             seed: seed,
-            cardData: cardData
+            cardData: cardData,
+            openedKegs: []
         }
     }
 
     // not using seed for now
+    // pity timer not implemented yet
     _openKeg = (seed) => {
         // generate first 4 cards
         var cards = [];
@@ -75,7 +75,9 @@ class App extends Component {
                 premium = true;
             }
             var cardRoll = getRandomInt(0, this.state.cardData[rarity].length);
-            cards.push(this.state.cardData[rarity][cardRoll]);
+            var card = this.state.cardData[rarity][cardRoll];
+            card['premium'] = premium;
+            cards.push(card);
         }
         // generate choices for 5th card, starts as rare
         var fifthRoll = Math.random();
@@ -90,25 +92,39 @@ class App extends Component {
         var choices = this.state.cardData[rarity];
         var choice1Roll = getRandomInt(0, choices.length)
         var choice1 = choices[choice1Roll]
-        choices.splice(choice1Roll, 1);
+        var choice1PremiumRoll = Math.random();
+        choice1['premium'] = (choice1PremiumRoll <= premiumUpgradeChance);
         var choice2Roll = getRandomInt(0, choices.length);
+        while (choice2Roll === choice1Roll) {
+            choice2Roll = getRandomInt(0, choices.length);
+        }
         var choice2 = choices[choice2Roll];
-        choices.splice(choice2Roll, 1);
+        var choice2PremiumRoll = Math.random();
+        choice2['premium'] = (choice2PremiumRoll <= premiumUpgradeChance);
         var choice3Roll = getRandomInt(0, choices.length);
+        while (choice3Roll === choice1Roll && choice3Roll === choice2Roll) {
+            choice3Roll = getRandomInt(0, choices.length);
+        }
         var choice3 = choices[choice3Roll];
+        var choice3PremiumRoll = Math.random();
+        choice3['premium'] = (choice3PremiumRoll <= premiumUpgradeChance);
         var fifthCard = [choice1, choice2, choice3];
         cards.push(fifthCard);
-        console.log(cards);
+        this.setState({openedKegs: this.state.openedKegs.push(cards)});
     }
 
     // show loading screen while pack opening is loading
-    componentDidMount() {
-        this._openKeg(1);
+    componentWillMount() {
+        for (var i = 0; i < this.state.initialKegs; i++) {
+            this._openKeg(1);
+        }
     }
 
     render() {
         return (
-            <div></div>
+            <div>
+                <OpenedCardList openedKegs={this.state.openedKegs}></OpenedCardList>
+            </div>
         )
     }
 }

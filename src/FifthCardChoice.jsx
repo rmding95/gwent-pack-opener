@@ -12,12 +12,20 @@ export default class FifthCardChoice extends Component {
 
     render() {
         return (
-            <div>
+            <div style={styles.area}>
                 <Card card={this.state.choices[0]}></Card>
                 <Card card={this.state.choices[1]}></Card>
                 <Card card={this.state.choices[2]}></Card>
             </div>
         )
+    }
+}
+
+const styles = {
+    area: {
+        float: 'right',
+        border: '2px solid black',
+        borderRadius: '2px'
     }
 }
 

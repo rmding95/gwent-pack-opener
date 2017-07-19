@@ -27,8 +27,8 @@ const premiumUpgradeChance = 0.02
 var data = require('./data/card_json.json');
 
 class App extends Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         
         var cardData = {};
         data.forEach(function(element) {
@@ -95,6 +95,7 @@ class App extends Component {
         var choice1PremiumRoll = Math.random();
         choice1['premium'] = (choice1PremiumRoll <= premiumUpgradeChance);
         var choice2Roll = getRandomInt(0, choices.length);
+        // observed situation where choice1 and choice2 rolls were the same
         while (choice2Roll === choice1Roll) {
             choice2Roll = getRandomInt(0, choices.length);
         }
@@ -110,14 +111,17 @@ class App extends Component {
         choice3['premium'] = (choice3PremiumRoll <= premiumUpgradeChance);
         var fifthCard = [choice1, choice2, choice3];
         cards.push(fifthCard);
-        this.setState({openedKegs: this.state.openedKegs.push(cards)});
+        return cards;
     }
 
     // show loading screen while pack opening is loading
     componentWillMount() {
+        var all = [];
         for (var i = 0; i < this.state.initialKegs; i++) {
-            this._openKeg(1);
+            var cards = this._openKeg(1);
+            all.push(cards);
         }
+        this.setState({openedKegs: all});
     }
 
     render() {

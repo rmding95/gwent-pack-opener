@@ -3,6 +3,8 @@ import logo from './logo.svg';
 import './App.css';
 
 import OpenedCardList from './OpenedCardList.jsx';
+import NumberOfKegs from './NumberOfKegs.jsx';
+import OneMoreKeg from './OneMoreKeg.jsx';
 // ASSUMPTIONS
 // rarity of cards in packs is determined by seed
 // cards are chosen randomly
@@ -39,7 +41,7 @@ class App extends Component {
         }, this);
         var seed = getRandomInt(1, 10000);
         this.state = {
-            initialKegs: 50,
+            initialKegs: 5,
             seed: seed,
             cardData: cardData,
             openedKegs: []
@@ -48,7 +50,7 @@ class App extends Component {
 
     // not using seed for now
     // pity timer not implemented yet
-    _openKeg = (seed) => {
+    openKeg = (seed) => {
         // generate first 4 cards
         var cards = [];
         for (var i = 0; i < 4; i++) {
@@ -114,20 +116,31 @@ class App extends Component {
         return cards;
     }
 
-    // show loading screen while pack opening is loading
-    componentWillMount() {
+    renderKegs = (numKegs) => {
         var all = [];
-        for (var i = 0; i < this.state.initialKegs; i++) {
-            var cards = this._openKeg(1);
+        for (var i = 0; i < numKegs; i++) {
+            var cards = this.openKeg(1);
             all.push(cards);
         }
-        this.setState({openedKegs: all});
+        console.log(all);
+        this.setState({openedKegs: all});        
+    }
+
+    listenForEnterKeyPress = (value) => {
+        this.renderKegs(value);
+    }
+
+    // show loading screen while pack opening is loading
+    componentWillMount() {
+        this.renderKegs(this.state.initialKegs);
     }
 
     render() {
         return (
             <div>
+                <NumberOfKegs numKegs={this.state.initialKegs} onKeyPress={this.listenForEnterKeyPress}></NumberOfKegs>
                 <OpenedCardList openedKegs={this.state.openedKegs}></OpenedCardList>
+                <OneMoreKeg></OneMoreKeg>
             </div>
         )
     }

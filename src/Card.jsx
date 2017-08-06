@@ -31,10 +31,10 @@ export default class Card extends Component {
 let styles = {
     card: {
         borderRadius: 5,
-        width: 100,
         height: 20,
         float: 'right',
         padding: 10,
+        width: '20%'
     },
     Common: {
         backgroundColor: 'rgb(118, 118, 118)'

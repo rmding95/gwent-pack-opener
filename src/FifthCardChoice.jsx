@@ -23,6 +23,7 @@ export default class FifthCardChoice extends Component {
 
 const styles = {
     area: {
+        width: '100%',
         float: 'right',
         border: '2px solid black',
         borderRadius: '2px'

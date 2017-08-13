@@ -5,6 +5,7 @@ import './App.css';
 import OpenedCardList from './OpenedCardList.jsx';
 import NumberOfKegs from './NumberOfKegs.jsx';
 import OneMoreKeg from './OneMoreKeg.jsx';
+import MostValuableKegs from './MostValuableKegs.jsx';
 // ASSUMPTIONS
 // rarity of cards in packs is determined by seed
 // cards are chosen randomly
@@ -25,6 +26,19 @@ const epicToLegendaryUpgradeChance = 0.206;
 // not sure about premium chances yet
 const premiumUpgradeChance = 0.02
 
+const commonScrapValue = 20;
+const rareScrapValue = 80;
+const epicScrapValue = 200;
+const legendaryScrapValue = 400;
+
+// not sure about these values yet
+const commonPremiumScrapValue = 50;
+const rarePremiumScrapValue = 80;
+const epicPremiumScrapValue = 200;
+const legendaryPremiumScrapValue = 400;
+
+const topMostValuableKegsToDisplay = 5;
+
 // need to double check for non-collectable cards
 var data = require('./data/card_json.json');
 
@@ -41,7 +55,7 @@ class App extends Component {
         }, this);
         var seed = getRandomInt(1, 10000);
         this.state = {
-            initialKegs: 5,
+            initialKegs: 50,
             seed: seed,
             cardData: cardData,
             openedKegs: []
@@ -53,28 +67,42 @@ class App extends Component {
     openKeg = (seed) => {
         // generate first 4 cards
         var cards = [];
+        var totalScrapValue = 0;
         for (var i = 0; i < 4; i++) {
             // card starts as common
             var rarity = 'Common';
             var roll = Math.random();
             var premium = false;
+            totalScrapValue = totalScrapValue + commonScrapValue;
             if (roll <= commonToRareUpgradeChance) {
                 // upgraded to rare
                 rarity = 'Rare';
                 roll = Math.random();
+                totalScrapValue = totalScrapValue + rareScrapValue - commonScrapValue;
                 if (roll <= rareToEpicUpgradeChance) {
                     // upgraded to epic
                     rarity = 'Epic'
                     roll = Math.random();
+                    totalScrapValue = totalScrapValue + epicScrapValue - rareScrapValue;
                     if (roll <= epicToLegendaryUpgradeChance) {
                         // upgraded to legendary
                         rarity = 'Legendary';
+                        totalScrapValue = totalScrapValue + legendaryScrapValue - epicScrapValue;;
                     }
                 }
             }
             var premiumRoll = Math.random();
             if (premiumRoll <= premiumUpgradeChance) {
                 premium = true;
+                if (rarity === 'Common') {
+                    totalScrapValue = totalScrapValue - commonScrapValue + commonPremiumScrapValue;
+                } else if (rarity === 'Rare') {
+                    totalScrapValue = totalScrapValue - rareScrapValue + rarePremiumScrapValue;
+                } else if (rarity === 'Epic') {
+                    totalScrapValue = totalScrapValue - epicScrapValue + epicPremiumScrapValue;
+                } else {
+                    totalScrapValue = totalScrapValue - legendaryScrapValue + legendaryPremiumScrapValue;
+                }
             }
             var cardRoll = getRandomInt(0, this.state.cardData[rarity].length);
             var card = this.state.cardData[rarity][cardRoll];
@@ -83,15 +111,19 @@ class App extends Component {
         }
         // generate choices for 5th card, starts as rare
         var fifthRoll = Math.random();
-        var rarity = 'Rare';
+        var fifthCardRarity = 'Rare';
+        // not accounting for premium scrap values in 5th card choice yet
+        totalScrapValue = totalScrapValue + rareScrapValue;
         if (fifthRoll <= rareToEpicUpgradeChance) {
             fifthRoll = Math.random();
-            rarity = 'Epic';
+            fifthCardRarity = 'Epic';
+            totalScrapValue = totalScrapValue + epicScrapValue - rareScrapValue;
             if (fifthRoll <= epicToLegendaryUpgradeChance) {
-                rarity = 'Legendary';
+                fifthCardRarity = 'Legendary';
+                totalScrapValue = totalScrapValue + legendaryScrapValue - epicScrapValue;
             }
         }
-        var choices = this.state.cardData[rarity];
+        var choices = this.state.cardData[fifthCardRarity];
         var choice1Roll = getRandomInt(0, choices.length)
         var choice1 = choices[choice1Roll]
         var choice1PremiumRoll = Math.random();
@@ -113,21 +145,47 @@ class App extends Component {
         choice3['premium'] = (choice3PremiumRoll <= premiumUpgradeChance);
         var fifthCard = [choice1, choice2, choice3];
         cards.push(fifthCard);
-        return cards;
+        return {cards: cards, totalScrapValue: totalScrapValue};
     }
 
     renderKegs = (numKegs) => {
-        var all = [];
+        var allCards = [];
+        var kegsAndScrap = [];
+        var mvKegs = [];
         for (var i = 0; i < numKegs; i++) {
-            var cards = this.openKeg(1);
-            all.push(cards);
+            var data = this.openKeg(1);
+            allCards.push(data.cards);
+            kegsAndScrap.push(data);
         }
-        console.log(all);
-        this.setState({openedKegs: all});        
+        mvKegs = this.calculateMostValuableKegs(kegsAndScrap);
+        this.setState({kegsAndScrap: kegsAndScrap});
+        this.setState({mvKegs: mvKegs});
+        this.setState({openedKegs: allCards});        
+    }
+
+    calculateMostValuableKegs = (data) => {
+        data.sort((a, b) => {
+            return a.totalScrapValue - b.totalScrapValue;
+        });
+        if (data.length <= 5) {
+            return data;
+        } else {
+            return data.slice(data.length - topMostValuableKegsToDisplay);
+        }
     }
 
     listenForEnterKeyPress = (value) => {
         this.renderKegs(value);
+    }
+
+    oneMoreKegButtonPress = (kegs) => {
+        var newKeg = kegs[kegs.length - 1].cards;
+        var openedKegs = this.state.openedKegs;
+        openedKegs.push(newKeg);
+        var mvKegs = this.calculateMostValuableKegs(kegs);
+        this.setState({openedKegs: openedKegs});
+        this.setState({mvKegs: mvKegs});
+        this.setState({kegsAndScrap: kegs});
     }
 
     // show loading screen while pack opening is loading
@@ -139,8 +197,9 @@ class App extends Component {
         return (
             <div>
                 <NumberOfKegs numKegs={this.state.initialKegs} onKeyPress={this.listenForEnterKeyPress}></NumberOfKegs>
+                <MostValuableKegs mvKegs={this.state.mvKegs}></MostValuableKegs>
                 <OpenedCardList openedKegs={this.state.openedKegs}></OpenedCardList>
-                <OneMoreKeg></OneMoreKeg>
+                <OneMoreKeg onClick={this.oneMoreKegButtonPress} kegs={this.state.kegsAndScrap} openKeg={this.openKeg}></OneMoreKeg>
             </div>
         )
     }

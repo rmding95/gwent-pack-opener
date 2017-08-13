@@ -5,10 +5,17 @@ export default class OneMoreKeg extends Component {
         super(props);
     }
 
+    onButtonPress = (e) => {
+        var newKeg = this.props.openKeg(1);
+        var kegs = this.props.kegs
+        kegs.push(newKeg);
+        this.props.onClick(kegs);
+    }
+
     render() {
         return (
             <div>
-                <button>One More Keg</button>
+                <button onClick={() => this.onButtonPress()}>One More Keg</button>
             </div>
         )
     }
@@ -16,6 +23,6 @@ export default class OneMoreKeg extends Component {
 
 const styles = {
     button: {
-        
+
     }
 }

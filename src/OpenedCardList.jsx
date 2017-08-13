@@ -29,7 +29,10 @@ export default class OpenedCardList extends Component {
             });
         }       
         return (
-            <div style={styles.area}>{listItems}</div>
+            <div style={styles.area}>
+                <h2>Opened Kegs</h2>
+                {listItems}
+            </div>
         )
     }
 }

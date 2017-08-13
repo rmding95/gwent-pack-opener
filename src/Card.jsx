@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+var FontAwesome = require('react-fontawesome');
 
 export default class Card extends Component {
     constructor(props) {
@@ -8,20 +9,31 @@ export default class Card extends Component {
             art: props.card.art,
             premium: props.card.premium,
             group: props.card.group,
-            rarity: props.card.rarity
+            rarity: props.card.rarity,
         }
     }
 
-    getStyles = (rarity) => {
+    getStyles = (rarity, premium) => {
         return Object.assign(
             styles.card,
             (rarity === 'Common') ? styles.Common : (rarity === 'Rare') ? styles.Rare : (rarity === 'Epic') ? styles.Epic : styles.Legendary
         );
     }
 
+    showCardImage = (e) => {
+
+    }
+
     render() {
+        const premium = this.state.premium;
+        var cardImage = null;
+        var premiumStar = null;
+        if (premium) {
+            premiumStar = <FontAwesome name='star-o' style={{color: 'yellow'}}></FontAwesome>
+        }
         return (
-            <div style={this.getStyles(this.state.rarity)}>
+            <div onClick={(e) => this.showCardImage(e)} style={this.getStyles(this.state.rarity, this.state.premium)}>
+                {premiumStar}
                 <span>{this.state.name}</span>
             </div>
         )
@@ -47,6 +59,6 @@ let styles = {
     },
     Legendary: {
         backgroundColor: 'rgb(242, 113, 28)'
-    }
+    },
 }
 

@@ -2,10 +2,13 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import { Tab } from 'react-bootstrap';
+
 import OpenedCardList from './OpenedCardList.jsx';
 import NumberOfKegs from './NumberOfKegs.jsx';
 import OneMoreKeg from './OneMoreKeg.jsx';
 import MostValuableKegs from './MostValuableKegs.jsx';
+import Navbar from './Navbar.jsx';
 // ASSUMPTIONS
 // rarity of cards in packs is determined by seed
 // cards are chosen randomly
@@ -197,6 +200,7 @@ class App extends Component {
         return (
             <div>
                 <NumberOfKegs numKegs={this.state.initialKegs} onKeyPress={this.listenForEnterKeyPress}></NumberOfKegs>
+                <Navbar></Navbar>
                 <MostValuableKegs mvKegs={this.state.mvKegs}></MostValuableKegs>
                 <OpenedCardList openedKegs={this.state.openedKegs}></OpenedCardList>
                 <OneMoreKeg onClick={this.oneMoreKegButtonPress} kegs={this.state.kegsAndScrap} openKeg={this.openKeg}></OneMoreKeg>

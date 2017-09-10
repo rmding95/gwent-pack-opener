@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Grid, Row, Col } from 'react-bootstrap';
 var FontAwesome = require('react-fontawesome');
 
 export default class Card extends Component {
@@ -21,18 +22,30 @@ export default class Card extends Component {
     }
 
     showCardImage = (e) => {
+        this.setState({isMouseInside: true});
+    }
 
+    removeCardImage = () => {
+        this.setState({isMouseInside: false});
     }
 
     render() {
         const premium = this.state.premium;
+        var isMouseInside = this.state.isMouseInside;
         var cardImage = null;
+        if (isMouseInside) {
+            var src = "./src/" + this.state.art;
+            cardImage = <img src={src} style={styles.image}/>
+        }
+
         var premiumStar = null;
         if (premium) {
             premiumStar = <FontAwesome name='star-o' style={{color: 'yellow'}}></FontAwesome>
         }
+
         return (
-            <div onClick={(e) => this.showCardImage(e)} style={this.getStyles(this.state.rarity, this.state.premium)}>
+            <div onClick={(e) => this.showCardImage(e)} onMouseEnter={() => this.showCardImage} onMouseLeave={() => this.removeCardImage} style={this.getStyles(this.state.rarity, this.state.premium)}>
+                {cardImage}
                 {premiumStar}
                 <span>{this.state.name}</span>
             </div>
@@ -60,5 +73,9 @@ let styles = {
     Legendary: {
         backgroundColor: 'rgb(242, 113, 28)'
     },
+    image: {
+        height: 50,
+        width: 50
+    }
 }
 
